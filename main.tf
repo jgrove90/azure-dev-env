@@ -1,4 +1,4 @@
-# Azure Provider source and version being used
+# declare providers
 terraform {
   required_providers {
     azurerm = {
@@ -8,11 +8,12 @@ terraform {
   }
 }
 
-# Configure the Microsoft Azure Provider
+# call the provider
 provider "azurerm" {
   features {}
 }
 
+# add resources to provision
 resource "azurerm_resource_group" "cis620-rg" {
   name     = "cis620-resources"
   location = "West US"
