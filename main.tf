@@ -94,22 +94,24 @@ resource "azurerm_network_interface" "cis620-nic" {
   }
 
   tags = {
-    envirometn = "dev"
+    enviroment = "dev"
   }
 }
 
 resource "azurerm_linux_virtual_machine" "cis620-vm" {
-  name                = "cis620-linux-vm"
+  name                = "cis620-dev"
   resource_group_name = azurerm_resource_group.cis620-rg.name
   location            = azurerm_resource_group.cis620-rg.location
   size                = "Standard_B1s"
-  admin_username      = "adminuser"
+  admin_username      = "admin"
   network_interface_ids = [
     azurerm_network_interface.cis620-nic.id,
   ]
 
+  custom_data = filebase64("install_dependencies.sh")
+
   admin_ssh_key {
-    username   = "adminuser"
+    username   = "admin"
     public_key = file("~/.ssh/cis620_azure_key.pub")
   }
 
