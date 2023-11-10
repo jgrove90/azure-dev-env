@@ -103,7 +103,7 @@ resource "azurerm_linux_virtual_machine" "cis620-vm" {
   resource_group_name = azurerm_resource_group.cis620-rg.name
   location            = azurerm_resource_group.cis620-rg.location
   size                = "Standard_B1s"
-  admin_username      = "admin"
+  admin_username      = "jared"
   network_interface_ids = [
     azurerm_network_interface.cis620-nic.id,
   ]
@@ -111,7 +111,7 @@ resource "azurerm_linux_virtual_machine" "cis620-vm" {
   custom_data = filebase64("install_dependencies.sh")
 
   admin_ssh_key {
-    username   = "admin"
+    username   = "jared"
     public_key = file("~/.ssh/cis620_azure_key.pub")
   }
 
