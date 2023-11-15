@@ -13,7 +13,7 @@ provider "azurerm" {
   features {}
 }
 
-# add resources to provision
+# provision resource group
 resource "azurerm_resource_group" "cis620-rg" {
   name     = "cis620-resources"
   location = "West US"
@@ -23,6 +23,7 @@ resource "azurerm_resource_group" "cis620-rg" {
   }
 }
 
+# provision network services
 resource "azurerm_virtual_network" "cis620-vn" {
   name                = "cis620-network"
   resource_group_name = azurerm_resource_group.cis620-rg.name
@@ -39,35 +40,6 @@ resource "azurerm_subnet" "cis620-subnet" {
   resource_group_name  = azurerm_resource_group.cis620-rg.name
   virtual_network_name = azurerm_virtual_network.cis620-vn.name
   address_prefixes     = ["10.123.1.0/24"]
-}
-
-resource "azurerm_network_security_group" "cis620-sg" {
-  name                = "cis620-sg"
-  resource_group_name = azurerm_resource_group.cis620-rg.name
-  location            = azurerm_resource_group.cis620-rg.location
-
-  tags = {
-    enviroment = "dev"
-  }
-}
-
-resource "azurerm_subnet_network_security_group_association" "cis620-sga" {
-  subnet_id                 = azurerm_subnet.cis620-subnet.id
-  network_security_group_id = azurerm_network_security_group.cis620-sg.id
-}
-
-resource "azurerm_network_security_rule" "cis620-dev-rule" {
-  name                        = "cis620-dev-rule"
-  priority                    = 100
-  direction                   = "Inbound"
-  access                      = "Allow"
-  protocol                    = "*"
-  source_port_range           = "*"
-  destination_port_range      = "*"
-  source_address_prefix       = "*"
-  destination_address_prefix  = "*"
-  resource_group_name         = azurerm_resource_group.cis620-rg.name
-  network_security_group_name = azurerm_network_security_group.cis620-sg.name
 }
 
 resource "azurerm_public_ip" "cis620-ip" {
@@ -98,12 +70,42 @@ resource "azurerm_network_interface" "cis620-nic" {
   }
 }
 
+# provision security services
+resource "azurerm_network_security_group" "cis620-sg" {
+  name                = "cis620-sg"
+  resource_group_name = azurerm_resource_group.cis620-rg.name
+  location            = azurerm_resource_group.cis620-rg.location
+
+  tags = {
+    enviroment = "dev"
+  }
+}
+
+resource "azurerm_subnet_network_security_group_association" "cis620-sga" {
+  subnet_id                 = azurerm_subnet.cis620-subnet.id
+  network_security_group_id = azurerm_network_security_group.cis620-sg.id
+}
+
+resource "azurerm_network_security_rule" "cis620-dev-rule" {
+  name                        = "cis620-dev-rule"
+  priority                    = 100
+  direction                   = "Inbound"
+  access                      = "Allow"
+  protocol                    = "*"
+  source_port_range           = "*"
+  destination_port_range      = "*"
+  source_address_prefix       = "*"
+  destination_address_prefix  = "*"
+  resource_group_name         = azurerm_resource_group.cis620-rg.name
+  network_security_group_name = azurerm_network_security_group.cis620-sg.name
+}
+
 resource "azurerm_linux_virtual_machine" "cis620-vm" {
   name                = "cis620-dev"
   resource_group_name = azurerm_resource_group.cis620-rg.name
   location            = azurerm_resource_group.cis620-rg.location
   size                = "Standard_B1s"
-  admin_username      = "admin"
+  admin_username      = "jared"
   network_interface_ids = [
     azurerm_network_interface.cis620-nic.id,
   ]
@@ -111,7 +113,7 @@ resource "azurerm_linux_virtual_machine" "cis620-vm" {
   custom_data = filebase64("install_dependencies.sh")
 
   admin_ssh_key {
-    username   = "admin"
+    username   = "jared"
     public_key = file("~/.ssh/cis620_azure_key.pub")
   }
 
